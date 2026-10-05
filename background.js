@@ -1,3 +1,8 @@
+// Локально обрабатывает тестовые API-команды без обращения к внешнему серверу.
+import { registerMockApiHandler } from "./api-handler.js";
+
+registerMockApiHandler();
+
 // Адрес сайта и шаблон URL, на которых расширение запускает поиск записей.
 const TARGET_HOST = "icp.administracionelectronica.gob.es";
 const TARGET_URL =

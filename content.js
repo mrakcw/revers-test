@@ -1,6 +1,21 @@
 ﻿// Отмечает запуск внедренного скрипта и хранит результат последней проверки доступа.
 console.log("Script запущен!");
 let accessCache = null;
+const LOCAL_TEST_MODE = true;
+
+// Передает команду локальному обработчику в background.js.
+async function requestMockApi(mode, payload = {}) {
+  try {
+    return await chrome.runtime.sendMessage({
+      action: "MOCK_API_REQUEST",
+      mode,
+      payload,
+    });
+  } catch (error) {
+    console.error("Локальный API mock недоступен:", error);
+    return { ok: false, error: "mock_unavailable" };
+  }
+}
 
 // Находит поле по тексту подписи, заполняет его и сообщает странице об изменении.
 function fillInputByLabel(labelText, value) {
@@ -75,22 +90,12 @@ async function beginAttempt() {
     return window.__attemptId;
   }
 
+  /* Старый production-запрос start_attempt отключен:
   const { userId, hash } = await chrome.storage.local.get(["userId", "hash"]);
-
-  if (!userId || !hash) return null;
-
-  const res = await fetch(
-    "https://citaext.vercel.app/api/tg?mode=start_attempt",
-    {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ userId, hash }),
-    },
-  );
-
-  if (!res.ok) return null;
-
+  const res = await fetch("https://citaext.vercel.app/api/tg?mode=start_attempt", ...);
   const data = await res.json();
+  */
+  const data = await requestMockApi("start_attempt");
   if (!data.ok || !data.attemptId) return null;
 
   window.__attemptId = data.attemptId;
@@ -104,27 +109,15 @@ async function finishAttempt(reason = "no_slots") {
     return { ok: false, reason: "no_attempt" };
   }
 
-  const { userId, hash } = await chrome.storage.local.get(["userId", "hash"]);
-  if (!userId || !hash) {
-    return { ok: false, reason: "no_auth" };
-  }
-
   try {
-    const res = await fetch(
-      "https://citaext.vercel.app/api/tg?mode=consume_run",
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          hash,
-          attemptId: window.__attemptId,
-          reason,
-        }),
-      },
-    );
-
+    /* Старый production-запрос consume_run отключен:
+    const res = await fetch("https://citaext.vercel.app/api/tg?mode=consume_run", ...);
     const data = await res.json();
+    */
+    const data = await requestMockApi("consume_run", {
+      attemptId: window.__attemptId,
+      reason,
+    });
 
     if (data?.ok) {
       window.__attemptId = null;
@@ -273,19 +266,8 @@ function startCountdown(duration) {
 // Отправляет серверу сведения о подтвержденной записи.
 async function notifyBookingConfirmed(data) {
   try {
-    const { userId, hash } = await chrome.storage.local.get(["userId", "hash"]);
-
-    if (!userId || !hash) return;
-
-    await fetch("https://citaext.vercel.app/api/tg?mode=booking_confirmed", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        hash,
-        data,
-      }),
-    });
+    /* Production-вызов booking_confirmed отключен: событие остается локальным. */
+    await requestMockApi("booking_confirmed", { data });
   } catch (e) {
     console.error("notifyBookingConfirmed error:", e);
   }
@@ -294,15 +276,8 @@ async function notifyBookingConfirmed(data) {
 // Отправляет серверу уведомление без дополнительных данных.
 async function notifySimple(type) {
   try {
-    const { userId, hash } = await chrome.storage.local.get(["userId", "hash"]);
-
-    if (!userId || !hash) return;
-
-    await fetch(`https://citaext.vercel.app/api/tg?mode=${type}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ userId, hash }),
-    });
+    /* Production-уведомления отключены; сервер заменен локальным подтверждением. */
+    await requestMockApi(type);
   } catch (e) {
     console.error("notifySimple error:", e);
   }
@@ -351,15 +326,8 @@ function showNotification(message, duration = 3000) {
 // Формирует разрешенный тип уведомления и отправляет его на сервер расширения.
 async function notifyEdge(typeMessage, dataIMG = null) {
   try {
-    const { userId, hash } = await chrome.storage.local.get(["userId", "hash"]);
-
-    if (!userId || !hash) {
-      console.error("Нет userId или hash");
-      return;
-    }
-
     let endpoint = null;
-    let payload = { userId, hash };
+    let payload = {};
 
     switch (typeMessage) {
       case "book_date":
@@ -375,20 +343,9 @@ async function notifyEdge(typeMessage, dataIMG = null) {
         throw new Error(`Неизвестный typeMessage: ${typeMessage}`);
     }
 
-    const res = await fetch(
-      `https://citaext.vercel.app/api/tg?mode=${endpoint}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      },
-    );
-
-    if (!res.ok) {
-      throw new Error(`Edge error ${res.status}`);
-    }
+    /* Старый production fetch для уведомлений отключен. */
+    const res = await requestMockApi(endpoint, payload);
+    if (!res?.ok) throw new Error(`Mock error: ${res?.error}`);
 
     console.log(`Edge notification sent: ${typeMessage}`);
   } catch (e) {
@@ -446,6 +403,15 @@ function waitForElement(selector, timeout = 10000) {
 
 // Ожидает код SMS или CAPTCHA от сервера, вводит его в соответствующее поле и завершает ожидание.
 function waitForCode(type) {
+  if (LOCAL_TEST_MODE) {
+    showNotification(
+      `Локальная отладка: автоматический ввод кода ${type} отключен.`,
+      10000,
+    );
+    return Promise.resolve(null);
+  }
+
+  /* Старый цикл получения кодов с production API отключен и оставлен для справки.
   const checkInterval = 7000; // 7 секунд
   const MAX_WAIT_MS = 6 * 60 * 1000; // 6 минут
   const startedAt = Date.now();
@@ -539,6 +505,7 @@ function waitForCode(type) {
 
     poll();
   });
+  */
 }
 
 // Разрешает Promise сразу после полной загрузки документа или по событию load.
@@ -573,6 +540,31 @@ async function performSteps(userData) {
       console.log("Ждем 5 сек");
       showNotification(`Ждем ${4500 / 1000} сек...`, 4500);
       await waitForAdditionalTime(4500);
+    }
+
+    // В тестовом режиме проходим формы до слота, CAPTCHA, SMS или подтверждения записи.
+    const pageText = document.body.innerText;
+    const bookingBoundaryReached =
+      pageText.includes("LIBRE") ||
+      pageText.includes("Selecciona una de las siguientes citas disponibles") ||
+      pageText.includes("CITA CONFIRMADA") ||
+      Boolean(
+        document.querySelector(
+          "#captcha, #txtCodigoVerificacion, #btnConfirmar",
+        ),
+      );
+
+    if (LOCAL_TEST_MODE && bookingBoundaryReached) {
+      showNotification(
+        "Тестовый проход остановлен перед выбором слота, кодом или подтверждением.",
+        15000,
+      );
+      await chrome.storage.local.set({ isEnabled: false });
+      chrome.runtime.sendMessage({
+        action: "STOP_AUTOMATION",
+        reason: "local_test_booking_boundary",
+      });
+      return;
     }
 
     // При временных ошибках портала выдерживает паузу и затем возвращается на страницу записи.
@@ -1138,6 +1130,15 @@ async function performSteps(userData) {
 
 // Проверяет на сервере, разрешена ли текущему пользователю автоматизация.
 async function checkAccess() {
+  if (LOCAL_TEST_MODE) {
+    /* Старый production-запрос verify_access отключен в локальном режиме:
+    const res = await fetch("https://citaext.vercel.app/api/tg?mode=verify_access", ...);
+    */
+    const result = await requestMockApi("verify_access");
+    return Boolean(result?.ok);
+  }
+
+  /* Старый production-запрос verify_access отключен в локальном режиме:
   try {
     const { userId, hash } = await chrome.storage.local.get(["userId", "hash"]);
 
@@ -1171,6 +1172,8 @@ async function checkAccess() {
     console.error("checkAccess error:", e);
     return false;
   }
+  */
+  return false;
 }
 // Повторно использует результат проверки доступа в пределах текущей загрузки страницы.
 async function checkAccessCached() {

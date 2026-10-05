@@ -39,7 +39,6 @@
   },
   "host_permissions": [
     "https://icp.administracionelectronica.gob.es/*",
-    "https://sede.administracionespublicas.gob.es/*",
-    "https://citaext.vercel.app/*"
+    "https://sede.administracionespublicas.gob.es/*"
   ]
 }

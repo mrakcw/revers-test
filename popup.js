@@ -8,8 +8,23 @@ import {
   OFFICES,
 } from "./procedures.js";
 
-// Адрес серверного API; рядом хранятся ссылки на элементы формы расширения.
-const EDGE_ENDPOINT = "https://citaext.vercel.app";
+// Включает локальный процесс отладки без авторизации и серверных лимитов.
+const LOCAL_TEST_MODE = true;
+
+// Отправляет запросы только локальному mock-обработчику фонового скрипта.
+async function requestMockApi(mode, payload = {}) {
+  try {
+    return await chrome.runtime.sendMessage({
+      action: "MOCK_API_REQUEST",
+      mode,
+      payload,
+    });
+  } catch (error) {
+    console.error("Локальный API mock недоступен:", error);
+    return { ok: false, error: "mock_unavailable" };
+  }
+}
+
 let isFormLocked = false;
 const userName = document.getElementById("userName");
 const userNie = document.getElementById("userNie");
@@ -245,21 +260,11 @@ async function fetchAccessStatus() {
   accessFetchInProgress = true;
 
   try {
-    const { userId, hash } = await chrome.storage.local.get(["userId", "hash"]);
-    if (!userId || !hash) return null;
-
-    const res = await fetch(
-      "https://citaext.vercel.app/api/tg?mode=verify_access",
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ userId, hash }),
-      },
-    );
-
-    if (!res.ok) return null;
-
+    /* Старый production-запрос verify_access отключен:
+    const res = await fetch("https://citaext.vercel.app/api/tg?mode=verify_access", ...);
     return await res.json();
+    */
+    return await requestMockApi("verify_access");
   } catch {
     return null;
   } finally {
@@ -281,6 +286,12 @@ function renderAccessStatus(data) {
   if (data?.access === "unknown") {
     el.textContent = "⚠️ Не удалось обновить статус доступа";
     el.style.color = "#999";
+    return;
+  }
+
+  if (data?.access === "test") {
+    el.textContent = "Локальная отладка";
+    el.style.color = "#2563eb";
     return;
   }
 
@@ -323,20 +334,17 @@ async function checkAuth() {
   statusEl.className = "auth-status";
 
   try {
-    const res = await fetch(`${EDGE_ENDPOINT}/api/tg?mode=check_auth`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ code: authCode }),
-    });
+    /* Старая Telegram-проверка check_auth отключена в локальном тестовом режиме:
+    const res = await fetch(`${EDGE_ENDPOINT}/api/tg?mode=check_auth`, ...);
+    */
+    const data = await requestMockApi("check_auth", { code: authCode });
 
-    if (!res.ok) {
+    if (!data?.ok) {
       statusEl.textContent =
         "Код не подтверждён. Отправьте его боту и попробуйте ещё раз.";
       statusEl.className = "auth-status error";
       return;
     }
-
-    const data = await res.json();
 
     chrome.storage.local.set({
       state: STATES.AUTHORIZED,
@@ -570,6 +578,7 @@ async function handleStart() {
     return;
   }
 
+  /* В production-режиме здесь проверяется авторизация и остаток лимита.
   if (
     !accessState ||
     (accessState.access === "demo" && Number(accessState.demo_left) <= 0) ||
@@ -582,6 +591,7 @@ async function handleStart() {
     errorEl.style.display = "block";
     return;
   }
+  */
   const meta = PROCEDURE_META?.[Number(userProcedure.value)]?.[userCity.value];
   if (meta?.status === "entrar_onlyClave") {
     errorEl.textContent = "Эта процедура доступна только через Cl@ve";
@@ -629,6 +639,7 @@ async function handleStart() {
 
   chrome.runtime.sendMessage({
     action: "START_AUTOMATION",
+    payload,
   });
 }
 
@@ -640,7 +651,10 @@ document.addEventListener("DOMContentLoaded", () => {
       currentState = data.state || STATES.NOT_AUTH;
       authCode = data.authCode || null;
 
-      if (currentState === STATES.AUTHORIZED) {
+      if (LOCAL_TEST_MODE) {
+        currentState = STATES.AUTHORIZED;
+        showAuthorized({ first_name: "Локальный тест", username: "local-test" });
+      } else if (currentState === STATES.AUTHORIZED) {
         showAuthorized(data);
       } else if (currentState === STATES.WAIT_TG && authCode) {
         showWaitTG();
