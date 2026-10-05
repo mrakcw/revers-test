@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <!-- Метаданные окна popup, его заголовок и подключение таблицы стилей. -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CitaExt</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <!-- Корневой контейнер popup и заголовок расширения. -->
+    <div class="container">
+      <h1>CitaExt</h1>
+
+      <!-- ===== НЕ АВТОРИЗОВАН ===== -->
+      <div id="notAuthSection" class="state-section">
+        <h2>Авторизация</h2>
+        <p>Для начала работы необходимо авторизоваться через Telegram.</p>
+        <button id="authStartBtn">Авторизоваться</button>
+      </div>
+
+      <!-- ===== ОЖИДАНИЕ TELEGRAM ===== -->
+      <div id="waitTGSection" class="state-section" style="display: none">
+        <h2>Подтверждение</h2>
+
+        <p>
+          Напишите этому боту в Telegram:
+          <br />
+          <strong>@ExtCitaBot</strong> это сообщение:
+        </p>
+
+        <div class="code-box">
+          <code id="authCodeText">auth_1234567</code>
+          <button
+            id="copyAuthCodeBtn"
+            type="button"
+            aria-label="Скопировать код"
+          >
+            📋
+          </button>
+        </div>
+
+        <button id="authCheckBtn">Проверить</button>
+        <div id="authStatus" class="auth-status"></div>
+      </div>
+
+      <!-- ===== АВТОРИЗОВАН ===== -->
+      <div id="authorizedSection" style="display: none">
+        <div class="connected-info">
+          Подключено: <strong id="connectedUserName"></strong>
+
+          <button
+            id="logoutBtn"
+            class="logout-btn"
+            title="Выйти из Telegram"
+            aria-label="Выйти"
+          >
+            ✕
+          </button>
+
+          <div id="accessStatus">
+            <span class="spinner"></span>
+            Проверяем доступ…
+          </div>
+          <div class="access-hint" id="accessHint" style="display: none">
+            <p>
+              🔒 Доступ ограничен<br />
+              Управление доступом осуществляется через Telegram Bot
+            </p>
+            <p class="hint">
+              Напишите боту @ExtCitaBot команду <b>/limit</b> для информации о
+              доступе
+            </p>
+          </div>
+        </div>
+
+        <!-- ===== ФОРМА ДАННЫХ ===== -->
+        <div class="form-section">
+          <h2>Данные для поиска:</h2>
+
+          <!-- ===== ПРОВИНЦИЯ ===== -->
+          <label>Провинция *</label>
+          <select id="userCity" disabled></select>
+
+          <!-- ===== ПРОЦЕДУРА ===== -->
+          <label>Процедура *</label>
+          <select id="userProcedure" disabled>
+            <option value="">Выберите процедуру</option>
+          </select>
+
+          <!-- ===== ОФИСЫ ===== -->
+          <label id="officeLabel" style="display: none">Офис</label>
+          <div id="officeWrapper" class="office-wrapper" style="display: none">
+            <div class="office-header" id="officeToggle">
+              <span id="selectedOfficeSummary">Любой</span>
+              <span class="arrow-icon">▼</span>
+            </div>
+
+            <div
+              id="officeContent"
+              class="office-content"
+              style="display: none"
+            >
+              <div class="office-mode">
+                <label class="mode-item">
+                  <input
+                    type="radio"
+                    name="officeMode"
+                    value="prefer"
+                    checked
+                  />
+                  <span>Предпочтительно</span>
+                </label>
+                <label class="mode-item">
+                  <input type="radio" name="officeMode" value="strict" />
+                  <span>Обязательно</span>
+                </label>
+              </div>
+              <div class="office-box">
+                <label class="office-item office-any-item">
+                  <input type="checkbox" id="office_any" checked />
+                  <span class="office-name">Все офисы</span>
+                </label>
+                <div id="officeList" class="office-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== ФИО ===== -->
+          <label>ФИО *</label>
+          <span class="hint">Например: IVAN PETROV</span>
+          <input id="userName" type="text" disabled />
+
+          <!-- ===== ТИП ДОКУМЕНТА ===== -->
+          <div id="docTypeWrapper" style="display: none">
+            <div class="doc-type-row">
+              <label class="radio">
+                <input
+                  type="radio"
+                  name="documentType"
+                  value="NIE"
+                  id="docNie"
+                />
+                NIE
+              </label>
+
+              <label class="radio">
+                <input
+                  type="radio"
+                  name="documentType"
+                  value="PASSPORT"
+                  id="docPassport"
+                />
+                Паспорт
+              </label>
+            </div>
+
+            <label id="passportLabel" style="display: none">Паспорт *</label>
+            <input id="userPassport" type="text" style="display: none" />
+          </div>
+          <!-- ===== NIE ===== -->
+          <div id="nieWrapper">
+            <label>N.I.E *</label>
+            <span class="hint">Z1234567W</span>
+            <input id="userNie" type="text" disabled />
+          </div>
+
+          <!-- ===== ТЕЛЕФОН ===== -->
+          <label>Телефон (испанский) *</label>
+          <span class="hint">6XXXXXXXX или 7XXXXXXXX</span>
+          <input id="userTel" type="tel" maxlength="9" disabled />
+
+          <!-- ===== EMAIL ===== -->
+          <label>Email *</label>
+          <span class="hint">example@gmail.com</span>
+          <input id="userEmail" type="email" disabled />
+
+          <div id="formError" class="form-error" style="display: none"></div>
+
+          <button id="startBtn">Начать</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Подключает логику popup как ES-модуль. -->
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

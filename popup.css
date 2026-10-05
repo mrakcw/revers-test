@@ -1,0 +1,514 @@
+/* Базовый сброс отступов и единая модель размеров для элементов интерфейса. */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Ubuntu,
+    sans-serif;
+}
+
+/* Габариты popup и основные цвета текста и фона. */
+body {
+  width: 320px;
+  background: #f7f7f8;
+  color: #1f2937;
+}
+
+/* Внешние отступы основного содержимого popup. */
+.container {
+  padding: 14px 16px 18px;
+}
+
+/* Размеры и интервалы заголовков первого и второго уровней. */
+h1 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+/* Общий вид панелей авторизации и поясняющего текста в них. */
+.state-section {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.state-section p {
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 10px;
+}
+
+/* Общий вид кнопок и состояния наведения и нажатия. */
+button {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 5px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.05s ease;
+}
+
+button:hover {
+  background: #1e40af;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Блок кода подтверждения, кнопка копирования и состояния проверки авторизации. */
+
+.code-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  background: #f4f6f8;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 12px 0 16px;
+}
+
+.code-box code {
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #111;
+}
+
+#copyAuthCodeBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px;
+
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+.copyAuthCodeBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px;
+
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+#copyAuthCodeBtn:hover {
+  opacity: 1;
+}
+.copyAuthCodeBtn:hover {
+  opacity: 1;
+}
+
+.auth-status {
+  margin-top: 10px;
+  font-size: 13px;
+  min-height: 16px;
+}
+
+.auth-status.error {
+  color: #f44336;
+}
+
+.auth-status.success {
+  color: #4caf50;
+}
+
+#authCheckBtn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+  position: relative;
+}
+
+#authCheckBtn.loading::after {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* Панель, отображаемая после успешной авторизации. */
+#authorizedSection {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+/* Информация о подключенном аккаунте и кнопка выхода. */
+.connected-info {
+  position: relative;
+
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+
+  padding: 8px 22px 8px 10px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.logout-btn {
+  all: unset;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.35;
+  transition:
+    opacity 0.15s ease,
+    transform 0.1s ease;
+}
+
+.logout-btn:hover {
+  opacity: 1;
+  color: #f44336;
+  transform: scale(1.1);
+}
+
+/* Подписи, поля ввода и состояния фокуса в форме поиска. */
+.form-section h2 {
+  margin-bottom: 10px;
+}
+
+.form-section label {
+  display: block;
+  font-size: 12px;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.form-section input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  margin-bottom: 10px;
+  outline: none;
+}
+
+.form-section input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.3);
+}
+
+/* Стиль сообщения об успешном сохранении, если такой элемент присутствует. */
+#saveSuccessMsg {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #047857;
+  background: #d1fae5;
+  border-radius: 8px;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.hint {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Визуально обозначает поля, заблокированные во время автоматизации. */
+input:disabled,
+select:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Отступы и оформление подсказок об ошибках формы. */
+.radio-group {
+  margin-bottom: 10px;
+}
+
+.radio-group label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.form-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+/* Выпадающие списки провинций и процедур, включая фокус и заблокированное состояние. */
+select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  margin-bottom: 10px;
+  outline: none;
+  background: #ffffff;
+}
+
+select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.3);
+}
+
+select:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.form-section input[readonly],
+.form-section select:disabled {
+  background: #f3f3f3;
+  color: #555;
+  cursor: not-allowed;
+}
+
+/* Отличает кнопку остановки от кнопки запуска. */
+#startBtn.stop {
+  background: #d9534f;
+}
+
+/* Анимированный индикатор проверки статуса доступа. */
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #ccc;
+  border-top-color: #2196f3;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Переключатели NIE/паспорта, подсказка доступа и список офисов. */
+
+.doc-type-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.doc-type-row .radio {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.doc-type-row input[type="radio"] {
+  accent-color: #4150b7;
+  cursor: pointer;
+  margin-bottom: -3px;
+}
+
+.doc-type-row input[type="radio"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.access-hint {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #444;
+}
+
+.access-hint .hint {
+  margin-top: 6px;
+  color: #666;
+  font-size: 12px;
+}
+
+.office-wrapper {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #fff;
+  position: relative;
+}
+
+.office-header {
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  min-height: 36px;
+}
+
+#selectedOfficeSummary {
+  font-size: 13px;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.office-content {
+  padding: 0 10px 10px;
+  border-top: 1px solid #f3f4f6;
+  background: #fff;
+}
+
+.office-box {
+  max-height: 250px;
+  overflow-y: auto;
+  margin-top: 5px;
+}
+
+.office-mode .mode-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.office-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.office-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.office-name {
+  font-size: 14px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #374151;
+  max-width: 240px;
+}
+
+.office-any-item {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.office-mode-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
+  align-items: center;
+}
+
+.office-mode-row .mode-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #4b5563;
+  cursor: pointer;
+  margin: 0;
+}
+
+.office-mode-row input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.arrow-icon {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+  color: #6b7280;
+}
+
+.office-wrapper.open .arrow-icon {
+  transform: rotate(180deg);
+}
+
+.office-mode {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+  margin: 7px 0;
+}
+
+/* Размер и цвет переключателей режима выбора офисов. */
+.office-mode input[type="radio"] {
+  width: 14px !important;
+  height: 14px !important;
+  margin: 0 !important;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
