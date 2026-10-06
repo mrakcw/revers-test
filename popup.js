@@ -1,4 +1,4 @@
-﻿// Импортирует справочники процедур, провинций, офисов и особенностей форм портала.
+// Импортирует справочники процедур, провинций, офисов и особенностей форм портала.
 import {
   PROCEDURES,
   CITIES,
@@ -614,7 +614,10 @@ async function handleStart() {
     document.querySelector('input[name="officeMode"]:checked')?.value ||
     "prefer";
 
+  const runMode = document.querySelector('input[name="runMode"]:checked')?.value || "SHORT";
+
   const payload = {
+    mode: runMode,
     name: userName.value,
     nie: userNie.value,
     passport: passportInput?.value || "",

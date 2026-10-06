@@ -175,6 +175,17 @@
           <span class="hint">example@gmail.com</span>
           <input id="userEmail" type="email" disabled />
 
+          <!-- ===== РЕЖИМ ПРОВЕРКИ ===== -->
+          <label>Режим проверки</label>
+          <div class="doc-type-row" style="margin-bottom: 12px">
+            <label class="radio">
+              <input type="radio" name="runMode" value="SHORT" checked /> SHORT (быстрый)
+            </label>
+            <label class="radio">
+              <input type="radio" name="runMode" value="FULL" /> FULL (полный с извлечением слотов)
+            </label>
+          </div>
+
           <div id="formError" class="form-error" style="display: none"></div>
 
           <button id="startBtn">Начать</button>
