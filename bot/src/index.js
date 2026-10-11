@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Bot } from "grammy";
-import { registerTestSection } from "./test-section.js";
+import { registerAutomationSection } from "./automation-section.js";
+import reconnect from "./reconnect.js";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -11,15 +12,25 @@ if (!token) {
 }
 
 const bot = new Bot(token);
+const context = {
+  config: {
+    targetLink:
+      process.env.TARGET_LINK?.trim() ||
+      "https://icp.administracionelectronica.gob.es/icpplustiem/index.html",
+  },
+  services: {},
+};
 
-// Первый экран бота.
+reconnect.register(bot, context);
+
+// Стартовый экран Telegram-бота.
 bot.command("start", async (ctx) => {
   await ctx.reply(
-    "Привет! Это тестовый Telegram-бот.\n\nДоступные команды:\n/start — первый экран\n/test — вызвать тестовую функцию",
+    "Привет! Это исполнитель автоматизации Cita через Playwright без Chrome-расширения.\n\nДоступные команды:\n/start — это меню\n/test — справка по запуску\n/run — выбрать клиента и запустить сценарий\n/stop — остановить Firefox",
   );
 });
 
-const closeTestBrowser = registerTestSection(bot);
+const closeAutomationBrowser = registerAutomationSection(bot, context);
 
 bot.catch((error) => {
   console.error("Ошибка Telegram-бота:", error.error);
@@ -27,9 +38,9 @@ bot.catch((error) => {
 
 async function shutdown() {
   try {
-    await closeTestBrowser();
+    await closeAutomationBrowser();
   } catch (error) {
-    console.error("Не удалось закрыть тестовый Chromium:", error);
+    console.error("Не удалось закрыть Firefox:", error);
   } finally {
     bot.stop();
   }

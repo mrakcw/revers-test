@@ -7,6 +7,7 @@ import {
   PROCEDURE_META,
   OFFICES,
 } from "./procedures.js";
+import { TEST_USER_DATA, TEST_USER_DATA_ENABLED } from "./test.js";
 
 // Включает локальный процесс отладки без авторизации и серверных лимитов.
 const LOCAL_TEST_MODE = true;
@@ -851,7 +852,8 @@ document.addEventListener("change", (e) => {
 function loadUserData() {
   chrome.storage.local.get(
     ["userData", "isEnabled"],
-    ({ userData, isEnabled }) => {
+    ({ userData: savedUserData, isEnabled }) => {
+      const userData = TEST_USER_DATA_ENABLED ? TEST_USER_DATA : savedUserData;
       if (!userData) return;
 
       userName.value = userData.name || "";

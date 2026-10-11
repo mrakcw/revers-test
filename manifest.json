@@ -26,7 +26,7 @@
         "https://icp.administracionelectronica.gob.es/*",
         "https://sede.administracionespublicas.gob.es/*"
       ],
-      "js": ["content.js"]
+      "js": ["content.js", "test-data.js", "test-content.js"]
     }
   ],
   "action": {
